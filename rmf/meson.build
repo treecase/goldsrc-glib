@@ -63,7 +63,7 @@ librmf = library(
 if build_gir
   gir_args = [
     '--quiet',
-    '--doc-format=gi-docgen',
+    #'--doc-format=gi-docgen',
     '--accept-unprefixed', # for rmf_{byte,int,float,nstring}
     '-DRMF_COMPILATION',
   ]

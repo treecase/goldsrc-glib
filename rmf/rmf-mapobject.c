@@ -130,7 +130,7 @@ static void rmf_map_object_get_property(
         g_value_set_uint(value, priv->visgroup_id);
         break;
     case PROP_COLOR:
-        g_value_set_pointer(value, &priv->color);
+        g_value_set_boxed(value, &priv->color);
         break;
     case PROP_N_CHILDREN:
         g_value_set_uint(value, priv->children->len);

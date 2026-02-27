@@ -16,3 +16,12 @@ option(
   value: false,
   description: 'Build API reference and tools documentation',
 )
+
+# Tests
+
+option(
+  'test',
+  type: 'boolean',
+  value: false,
+  description: 'Build test executables',
+)

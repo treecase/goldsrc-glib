@@ -5,8 +5,10 @@ rmf_cargs = [
 
 # Sources
 
+# List of sources that do not contain public API, and should not be
 rmf_private_sources = files()
 
+# List of files that contain public API, and should be introspected
 rmf_public_sources = files(
   'rmf-entity.c',
   'rmf-entitydata.c',
@@ -71,7 +73,7 @@ if build_gir
     librmf,
     sources: [rmf_public_headers, rmf_public_sources],
     namespace: 'Rmf',
-    nsversion: rmf_api_version,
+    nsversion: goldsrc_api_version,
     identifier_prefix: 'Rmf',
     symbol_prefix: 'rmf',
     includes: ['GLib-2.0', 'GObject-2.0', 'Gio-2.0'],

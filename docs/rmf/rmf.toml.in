@@ -2,9 +2,9 @@
 version = "@version@"
 authors = "Treecase"
 license = "GPL-3.0-or-later"
-website_url = "https://treecase.github.io/rmf-glib"
-browse_url = "https://github.com/treecase/rmf-glib"
-description = "RMF loading library"
+website_url = "https://treecase.github.io/goldsrc-glib"
+browse_url = "https://github.com/treecase/goldsrc-glib"
+description = "GObject-based RMF loading library"
 devhelp = true
 search_index = true
 dependencies = ["GLib-2.0", "GObject-2.0", "Gio-2.0"]
@@ -30,10 +30,10 @@ show_index_summary = true
 show_class_heirarchy = true
 
 [source-location]
-base_url = "https://github.com/treecase/rmf-glib/blob/main/"
+base_url = "https://github.com/treecase/goldsrc-glib/blob/main/"
 
 [extra]
 content_files = ['about-rmf.md']
 content_images = []
-urlmap_file = "urlmap.js"
+urlmap_file = "../urlmap.js"
 

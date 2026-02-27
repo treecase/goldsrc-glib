@@ -32,9 +32,15 @@ jobs:
       - name: Build
         run: meson compile -Cbuild
 
+      - name: Move documentation artifacts
+        run: |
+          mkdir docs/reference/
+          mv docs/rmf/rmf docs/reference/rmf/
+          mv docs/wad/wad docs/reference/wad/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build/docs/rmf/
+          path: ./build/docs/reference/
 
   deploy:
     environment:

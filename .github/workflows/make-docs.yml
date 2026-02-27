@@ -34,13 +34,13 @@ jobs:
 
       - name: Move documentation artifacts
         run: |
-          mkdir ./build/docs/reference/
-          mv ./build/docs/rmf/rmf ./build/docs/reference/rmf/
-          mv ./build/docs/wad/wad ./build/docs/reference/wad/
+          cp -r ./docs/static ./build/docs/reference
+          cp -r ./build/docs/rmf/rmf ./build/docs/reference/rmf
+          cp -r ./build/docs/wad/wad ./build/docs/reference/wad
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build/docs/reference/
+          path: ./build/docs/reference
 
   deploy:
     environment:

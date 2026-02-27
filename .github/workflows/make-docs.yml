@@ -34,9 +34,9 @@ jobs:
 
       - name: Move documentation artifacts
         run: |
-          mkdir docs/reference/
-          mv docs/rmf/rmf docs/reference/rmf/
-          mv docs/wad/wad docs/reference/wad/
+          mkdir ./build/docs/reference/
+          mv ./build/docs/rmf/rmf ./build/docs/reference/rmf/
+          mv ./build/docs/wad/wad ./build/docs/reference/wad/
 
       - uses: actions/upload-pages-artifact@v3
         with:

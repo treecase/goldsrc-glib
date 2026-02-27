@@ -10,7 +10,7 @@ project(
   license: 'GPL-3.0-or-later',
 )
 
-goldsrc_api_version = meson.project_version().split('.')[0].to_int()
+goldsrc_api_version = meson.project_version().split('.')[0]
 goldsrc_api_name = '@0@-@1@'.format(meson.project_name(), goldsrc_api_version)
 
 goldsrc_prefix = get_option('prefix')

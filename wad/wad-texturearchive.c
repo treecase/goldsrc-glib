@@ -78,6 +78,7 @@ void wad_texture_archive_add_texture(
 )
 {
     g_return_if_fail(WAD_IS_TEXTURE_ARCHIVE(self));
+    g_return_if_fail(texture_name != nullptr);
     g_return_if_fail(G_IS_VALUE(texture));
     g_hash_table_insert(self->textures, g_strdup(texture_name), texture);
 }
@@ -112,4 +113,17 @@ GValue *wad_texture_archive_get_texture(
 {
     g_return_val_if_fail(WAD_IS_TEXTURE_ARCHIVE(self), nullptr);
     return g_hash_table_lookup(self->textures, texture_name);
+}
+
+/**
+ * wad_texture_archive_get_names:
+ * @archive: A [class@WadTextureArchive].
+ *
+ * Retrieves the texture names from the archive as a `NULL`-terminated array.
+ * Returns: (transfer container): A `NULL`-terminated array of texture names.
+ */
+char const **wad_texture_archive_get_names(WadTextureArchive *self)
+{
+    gpointer *names = g_hash_table_get_keys_as_array(self->textures, nullptr);
+    return (char const **)names;
 }

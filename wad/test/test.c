@@ -23,7 +23,21 @@ int main(int argc, char const *argv[])
     }
     g_print("Load successful.\n");
 
-    // TODO: list archive contents
+    g_autofree char const **names = wad_texture_archive_get_names(archive);
+    for (char const **name = names; *name != nullptr; ++name) {
+        GValue *value = wad_texture_archive_get_texture(archive, *name);
+        GType type = G_VALUE_TYPE(value);
+        if (type == WAD_TYPE_FONT_FILE) {
+            WadFontFile *font = g_value_get_boxed(value);
+            g_print("%16s\tFont\n", *name);
+        } else if (type == WAD_TYPE_MIPTEX_FILE) {
+            WadMiptexFile *miptex = g_value_get_boxed(value);
+            g_print("%16s\tMipTex\n", *name);
+        } else if (type == WAD_TYPE_QPIC_FILE) {
+            WadQpicFile *font = g_value_get_boxed(value);
+            g_print("%16s\tQPic\n", *name);
+        }
+    }
 
     return EXIT_SUCCESS;
 }

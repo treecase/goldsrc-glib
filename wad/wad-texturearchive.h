@@ -32,4 +32,6 @@ GValue *wad_texture_archive_get_texture(
     char const *texture_name
 );
 
+char const **wad_texture_archive_get_names(WadTextureArchive *archive);
+
 G_END_DECLS

@@ -85,5 +85,6 @@ libwad_dep = declare_dependency(
 )
 
 if get_option('test')
-  executable('wad-test', 'test/test.c', dependencies: libwad_dep)
+  gtk_dep = dependency('gtk4', version: '>=4.0')
+  executable('wad-demo', 'test/demo.c', dependencies: [gtk_dep, libwad_dep])
 endif

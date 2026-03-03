@@ -163,6 +163,7 @@ wad_input_stream_read_qpic_file(WadInputStream *self, GError **error)
         sizeof(guchar),
         qpic->width * qpic->height
     );
+    qpic->data->len = qpic->width * qpic->height;
     g_input_stream_read_all(
         G_INPUT_STREAM(stream),
         qpic->data->data,
@@ -182,6 +183,7 @@ wad_input_stream_read_qpic_file(WadInputStream *self, GError **error)
     }
     qpic->palette
         = g_array_sized_new(FALSE, FALSE, sizeof(WadRgb), colors_used);
+    qpic->palette->len = colors_used;
     g_input_stream_read_all(
         G_INPUT_STREAM(stream),
         qpic->palette->data,
@@ -252,6 +254,7 @@ wad_input_stream_read_miptex_file(WadInputStream *self, GError **error)
             = (miptex->width / divisor[i]) * (miptex->height / divisor[i]);
         miptex->mip_images[i]
             = g_array_sized_new(FALSE, FALSE, sizeof(guchar), bufsize);
+        miptex->mip_images[i]->len = bufsize;
         g_input_stream_read_all(
             G_INPUT_STREAM(stream),
             miptex->mip_images[i]->data,
@@ -272,6 +275,7 @@ wad_input_stream_read_miptex_file(WadInputStream *self, GError **error)
     }
     miptex->palette
         = g_array_sized_new(FALSE, FALSE, sizeof(WadRgb), colors_used);
+    miptex->palette->len = colors_used;
     if (miptex->palette->len != 0) {
         g_input_stream_read_all(
             G_INPUT_STREAM(stream),
@@ -330,6 +334,7 @@ wad_input_stream_read_font_file(WadInputStream *self, GError **error)
         return nullptr;
     }
     font->font_info = g_array_sized_new(FALSE, FALSE, sizeof(WadCharInfo), 256);
+    font->font_info->len = 256;
     g_input_stream_read_all(
         G_INPUT_STREAM(stream),
         font->font_info->data,
@@ -344,6 +349,7 @@ wad_input_stream_read_font_file(WadInputStream *self, GError **error)
     }
     font->data
         = g_array_sized_new(FALSE, FALSE, sizeof(guchar), font->height * 256);
+    font->data->len = font->height * 256;
     g_input_stream_read_all(
         G_INPUT_STREAM(stream),
         font->data->data,
@@ -363,6 +369,7 @@ wad_input_stream_read_font_file(WadInputStream *self, GError **error)
     }
     font->palette
         = g_array_sized_new(FALSE, FALSE, sizeof(WadRgb), colors_used);
+    font->palette->len = colors_used;
     g_input_stream_read_all(
         G_INPUT_STREAM(stream),
         font->palette->data,

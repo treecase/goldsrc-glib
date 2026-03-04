@@ -4,6 +4,7 @@
 #include "rmf-private.h"
 
 #include <glib.h>
+#include <graphene.h>
 
 /**
  * RmfVisgroup:
@@ -84,6 +85,56 @@ void rmf_visgroup_free(RmfVisgroup *self)
  */
 G_DEFINE_BOXED_TYPE(RmfFace, rmf_face, rmf_face_copy, rmf_face_free)
 
+static void compute_uv_axes(
+    graphene_plane_t const *pln,
+    graphene_vec3_t *xv,
+    graphene_vec3_t *yv
+)
+{
+    // Based on:
+    // https://github.com/id-Software/Quake-Tools/blob/master/qutils/QBSP/MAP.C#L221
+
+    // clang-format off
+    constexpr float BASE_AXIS[18][3] = {
+        { 0, 0, 1}, { 1, 0, 0}, { 0,-1, 0}, // floor
+        { 0, 0,-1}, { 1, 0, 0}, { 0,-1, 0}, // ceiling
+        { 1, 0, 0}, { 0, 1, 0}, { 0, 0,-1}, // west wall
+        {-1, 0, 0}, { 0, 1, 0}, { 0, 0,-1}, // east wall
+        { 0, 1, 0}, { 1, 0, 0}, { 0, 0,-1}, // south wall
+        { 0,-1, 0}, { 1, 0, 0}, { 0, 0,-1}, // north wall
+    };
+    // clang-format on
+    int bestaxis = 0;
+    float best = 0;
+    for (int i = 0; i < 6; ++i) {
+        graphene_vec3_t normal, baseaxis;
+        graphene_plane_get_normal(pln, &normal);
+        graphene_vec3_init(
+            &baseaxis,
+            BASE_AXIS[i * 3][0],
+            BASE_AXIS[i * 3][1],
+            BASE_AXIS[i * 3][2]
+        );
+        float dot = graphene_vec3_dot(&normal, &baseaxis);
+        if (dot > best) {
+            best = dot;
+            bestaxis = i;
+        }
+    }
+    graphene_vec3_init(
+        xv,
+        BASE_AXIS[bestaxis * 3 + 1][0],
+        BASE_AXIS[bestaxis * 3 + 1][1],
+        BASE_AXIS[bestaxis * 3 + 1][2]
+    );
+    graphene_vec3_init(
+        yv,
+        BASE_AXIS[bestaxis * 3 + 2][0],
+        BASE_AXIS[bestaxis * 3 + 2][1],
+        BASE_AXIS[bestaxis * 3 + 2][2]
+    );
+}
+
 void rmf_read_face(RmfLoader *self, RmfFace *face)
 {
     auto const RMF_VERSION = rmf_loader_get_version(self);
@@ -92,18 +143,10 @@ void rmf_read_face(RmfLoader *self, RmfFace *face)
     rmf_loader_seek(self, 4);
     if (RMF_VERSION >= 2.2f) {
         rmf_read_vector(self, &face->right_axis);
-    } else {
-        // TODO: Compute right_axis. See
-        // https://github.com/id-Software/Quake-Tools/blob/master/qutils/QBSP/MAP.C
-        // for details.
     }
     rmf_read_float(self, &face->shift_x);
     if (RMF_VERSION >= 2.2f) {
         rmf_read_vector(self, &face->down_axis);
-    } else {
-        // TODO: Compute down_axis. See
-        // https://github.com/id-Software/Quake-Tools/blob/master/qutils/QBSP/MAP.C
-        // for details.
     }
     rmf_read_float(self, &face->shift_y);
     rmf_read_float(self, &face->angle);
@@ -128,6 +171,30 @@ void rmf_read_face(RmfLoader *self, RmfFace *face)
     face->vertices
         = g_array_new_take(vertices, n_vertices, FALSE, sizeof(RmfVector));
     rmf_loader_read(self, 3 * sizeof(RmfVector), face->plane_points);
+
+    if (RMF_VERSION < 2.2f) {
+        graphene_plane_t plane;
+        graphene_plane_init_from_points(
+            &plane,
+            &(graphene_point3d_t){face->plane_points[2].x,
+                                  face->plane_points[2].y,
+                                  face->plane_points[2].z},
+            &(graphene_point3d_t){face->plane_points[1].x,
+                                  face->plane_points[1].y,
+                                  face->plane_points[1].z},
+            &(graphene_point3d_t){face->plane_points[0].x,
+                                  face->plane_points[0].y,
+                                  face->plane_points[0].z}
+        );
+        graphene_vec3_t right_axis, down_axis;
+        compute_uv_axes(&plane, &right_axis, &down_axis);
+        face->right_axis.x = graphene_vec3_get_x(&right_axis);
+        face->right_axis.y = graphene_vec3_get_y(&right_axis);
+        face->right_axis.z = graphene_vec3_get_z(&right_axis);
+        face->down_axis.x = graphene_vec3_get_x(&down_axis);
+        face->down_axis.y = graphene_vec3_get_y(&down_axis);
+        face->down_axis.z = graphene_vec3_get_z(&down_axis);
+    }
 }
 
 RmfFace *rmf_face_new(RmfLoader *loader)

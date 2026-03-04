@@ -25,6 +25,7 @@ wad_inc = include_directories('.')
 
 # Dependencies
 gio_dep = dependency('gio-2.0', version: '>=2.72')
+graphene_dep = dependency('graphene-1.0', version: '>=1.10')
 
 # Build
 gir = find_program('g-ir-scanner', required: get_option('introspection'), version: '>=1.80.0')

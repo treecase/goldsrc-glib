@@ -50,6 +50,7 @@ rmf_sources = rmf_public_sources + rmf_private_sources
 
 rmf_deps = [
   gio_dep,
+  graphene_dep,
 ]
 
 librmf = library(

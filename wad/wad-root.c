@@ -19,6 +19,8 @@ G_DEFINE_FINAL_TYPE(WadRoot, wad_root, G_TYPE_OBJECT)
 
 void load_from_stream(WadRoot *self, GInputStream *base_stream, GError **error)
 {
+    g_clear_object(&self->archive);
+
     g_autoptr(WadInputStream) stream = wad_input_stream_new(base_stream);
     GDataInputStream *dstream = G_DATA_INPUT_STREAM(stream);
     GError *e = nullptr;

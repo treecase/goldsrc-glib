@@ -16,7 +16,8 @@ static GdkPaintable *make_miptex_paintable(WadMiptexFile *miptex)
         data[(i * 4) + 3] = 0xff;
     }
 
-    GBytes *bytes = g_bytes_new(data, miptex->width * miptex->height * 4);
+    g_autoptr(GBytes) bytes
+        = g_bytes_new_take(data, miptex->width * miptex->height * 4);
 
     GdkTexture *texture = gdk_memory_texture_new(
         miptex->width,
@@ -38,7 +39,8 @@ static void activate(GApplication *)
 static void open(GApplication *application, GFile *files[], int, char *, void *)
 {
     GFile *file = files[0];
-    g_print("Opening %s...\n", g_file_get_basename(file));
+    g_autofree char *basename = g_file_get_basename(file);
+    g_print("Opening %s...\n", basename);
 
     g_autoptr(WadRoot) root = wad_root_new();
     g_autoptr(GError) error = nullptr;
@@ -46,7 +48,7 @@ static void open(GApplication *application, GFile *files[], int, char *, void *)
     if (error) {
         g_printerr(
             "%s: wad_root_load_from_file -- %s\n",
-            g_file_get_basename(file),
+            basename,
             error->message
         );
         return;
@@ -74,7 +76,7 @@ static void open(GApplication *application, GFile *files[], int, char *, void *)
         } else if (type == WAD_TYPE_MIPTEX_FILE) {
             WadMiptexFile *miptex = g_value_get_boxed(value);
 
-            GdkPaintable *texture = make_miptex_paintable(miptex);
+            g_autoptr(GdkPaintable) texture = make_miptex_paintable(miptex);
 
             GtkWidget *picture = gtk_picture_new_for_paintable(texture);
             gtk_picture_set_can_shrink(GTK_PICTURE(picture), FALSE);

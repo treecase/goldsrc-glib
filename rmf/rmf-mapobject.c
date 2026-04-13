@@ -133,7 +133,7 @@ static void rmf_map_object_get_property(
         g_value_set_boxed(value, &priv->color);
         break;
     case PROP_N_CHILDREN:
-        g_value_set_uint(value, priv->children->len);
+        g_value_set_uint(value, priv->children ? priv->children->len : 0);
         break;
     case PROP_CHILDREN:
         g_value_take_object(value, rmf_map_object_iterator_new(priv->children));

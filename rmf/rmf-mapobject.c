@@ -32,29 +32,6 @@ G_DEFINE_ENUM_TYPE(
 )
 
 /**
- * RmfMapObjectIterator:
- *
- * [iface@RmfIterator] which outputs [class@RmfMapObject]s.
- */
-
-/**
- * rmf_map_object_iterator_next:
- * @iterator: The iterator.
- *
- * Advance the iterator by one, returning the next object.
- *
- * Returns: (transfer none): The next object in the iterator, or `NULL` if the
- * iterator is exhausted.
- */
-RMF_DEFINE_ITERATOR_TYPE(
-    RmfMapObjectIterator,
-    rmf_map_object_iterator,
-    RMF,
-    MAP_OBJECT_ITERATOR,
-    RmfMapObject
-)
-
-/**
  * RmfMapObject:
  *
  * Base class for map objects.
@@ -66,14 +43,13 @@ typedef struct {
     RmfObjectType object_type;
     rmf_int visgroup_id;
     RmfColor color;
-    GPtrArray *children;
+    GListStore *children;
 } RmfMapObjectPrivate;
 
 enum Property {
     PROP_OBJECT_TYPE = 1,
     PROP_VISGROUP_ID,
     PROP_COLOR,
-    PROP_N_CHILDREN,
     PROP_CHILDREN,
     N_PROPERTIES,
 };
@@ -106,10 +82,7 @@ static void rmf_map_object_dispose(GObject *object)
 {
     auto const self = RMF_MAP_OBJECT(object);
     RmfMapObjectPrivate *const priv = rmf_map_object_get_instance_private(self);
-    if (priv->children) {
-        g_ptr_array_unref(priv->children);
-        priv->children = nullptr;
-    }
+    g_clear_object(&priv->children);
     G_OBJECT_CLASS(rmf_map_object_parent_class)->dispose(object);
 }
 
@@ -132,11 +105,8 @@ static void rmf_map_object_get_property(
     case PROP_COLOR:
         g_value_set_boxed(value, &priv->color);
         break;
-    case PROP_N_CHILDREN:
-        g_value_set_uint(value, priv->children ? priv->children->len : 0);
-        break;
     case PROP_CHILDREN:
-        g_value_take_object(value, rmf_map_object_iterator_new(priv->children));
+        g_value_set_object(value, priv->children);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -161,7 +131,7 @@ static void rmf_map_object_load_impl(RmfMapObject *self, RmfLoader *loader)
     rmf_read_int(loader, &n_children);
 
     if (n_children > 0) {
-        priv->children = g_ptr_array_new_full(n_children, g_object_unref);
+        priv->children = g_list_store_new(RMF_TYPE_MAP_OBJECT);
 
         rmf_loader_log_begin(
             loader,
@@ -172,10 +142,12 @@ static void rmf_map_object_load_impl(RmfMapObject *self, RmfLoader *loader)
             nullptr
         );
         for (rmf_int i = 0; i < n_children; ++i) {
-            RmfMapObject *child = rmf_map_object_new(loader);
-            g_ptr_array_add(priv->children, child);
+            g_autoptr(RmfMapObject) child = rmf_map_object_new(loader);
+            g_list_store_append(priv->children, child);
         }
-        g_assert(priv->children->len == n_children);
+        g_assert(
+            g_list_model_get_n_items(G_LIST_MODEL(priv->children)) == n_children
+        );
         rmf_loader_log_end(loader);
     }
 }
@@ -228,20 +200,6 @@ static void rmf_map_object_class_init(RmfMapObjectClass *klass)
     );
 
     /**
-     * RmfMapObject:n-children
-     * Number of child objects.
-     */
-    obj_properties[PROP_N_CHILDREN] = g_param_spec_uint(
-        "n-children",
-        nullptr,
-        nullptr,
-        0,
-        UINT32_MAX,
-        0,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS
-    );
-
-    /**
      * RmfMapObject:children
      * List of child objects.
      */
@@ -249,7 +207,7 @@ static void rmf_map_object_class_init(RmfMapObjectClass *klass)
         "children",
         nullptr,
         nullptr,
-        RMF_TYPE_MAP_OBJECT_ITERATOR,
+        G_TYPE_LIST_STORE,
         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS
     );
 
@@ -324,21 +282,6 @@ RmfColor rmf_map_object_get_color(RmfMapObject *self)
 }
 
 /**
- * rmf_map_object_get_n_children:
- * @map_object: The object.
- *
- * Gets the number of children belonging to the object.
- *
- * Returns: The number of children.
- */
-rmf_int rmf_map_object_get_n_children(RmfMapObject *self)
-{
-    rmf_int value = 0;
-    g_object_get(self, "n-children", &value, nullptr);
-    return value;
-}
-
-/**
  * rmf_map_object_get_children:
  * @map_object: The object.
  *
@@ -346,9 +289,9 @@ rmf_int rmf_map_object_get_n_children(RmfMapObject *self)
  *
  * Returns: (transfer full): An iterator over the children of this object.
  */
-RmfMapObjectIterator *rmf_map_object_get_children(RmfMapObject *self)
+GListStore *rmf_map_object_get_children(RmfMapObject *self)
 {
-    RmfMapObjectIterator *value = nullptr;
+    GListStore *value = nullptr;
     g_object_get(self, "children", &value, nullptr);
     return value;
 }

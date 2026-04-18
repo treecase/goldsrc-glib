@@ -27,19 +27,6 @@ typedef enum {
 
 GType rmf_object_type_get_type(void);
 
-// RmfMapObjectIterator
-
-#define RMF_TYPE_MAP_OBJECT_ITERATOR rmf_map_object_iterator_get_type()
-G_DECLARE_FINAL_TYPE(
-    RmfMapObjectIterator,
-    rmf_map_object_iterator,
-    RMF,
-    MAP_OBJECT_ITERATOR,
-    GObject
-)
-
-RmfMapObject *rmf_map_object_iterator_next(RmfMapObjectIterator *iterator);
-
 // RmfMapObject
 
 #define RMF_TYPE_MAP_OBJECT rmf_map_object_get_type()
@@ -62,8 +49,7 @@ void rmf_map_object_load(RmfMapObject *map_object, RmfLoader *loader);
 RmfObjectType rmf_map_object_get_object_type(RmfMapObject *map_object);
 rmf_int rmf_map_object_get_visgroup_id(RmfMapObject *map_object);
 RmfColor rmf_map_object_get_color(RmfMapObject *map_object);
-rmf_int rmf_map_object_get_n_children(RmfMapObject *map_object);
-RmfMapObjectIterator *rmf_map_object_get_children(RmfMapObject *map_object);
+GListStore *rmf_map_object_get_children(RmfMapObject *map_object);
 
 G_END_DECLS
 

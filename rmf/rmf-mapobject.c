@@ -287,7 +287,7 @@ RmfColor rmf_map_object_get_color(RmfMapObject *self)
  *
  * Gets the children of the object.
  *
- * Returns: (transfer full): An iterator over the children of this object.
+ * Returns: (transfer none): An iterator over the children of this object.
  */
 GListStore *rmf_map_object_get_children(RmfMapObject *self)
 {
